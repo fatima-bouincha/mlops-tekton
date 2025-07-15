@@ -1,0 +1,15 @@
+# trigger-binding.yaml
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: push-gitlab-binding
+spec:
+  params:
+    - name: gitRevision
+      value: $(body.after)
+    - name: dataset-path
+      value: "/scripts/iris.csv"
+    - name: gitUrl
+      value: $(body.project.git_http_url)  # Ajout de l'URL Git depuis GitLab
+    - name: gitBranch
+      value: $(body.ref)

@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: preprocess-task
+spec:
+  workspaces:
+    - name: shared-workspace
+  steps:
+    - name: copy-scripts
+      image: docker.io/bouinchafatima/mlops
+      script: |
+        #!/bin/sh
+        mkdir -p $(workspaces.shared-workspace.path)/scripts
+        cp -r /app/scripts/* $(workspaces.shared-workspace.path)/scripts/
+    - name: run-preprocess
+      image: docker.io/bouinchafatima/mlops
+      workingDir: $(workspaces.shared-workspace.path)/scripts
+      script: |
+        #!/bin/sh
+        python preprocess.py

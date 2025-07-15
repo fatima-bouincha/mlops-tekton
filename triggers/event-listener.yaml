@@ -1,0 +1,26 @@
+# event-listener.yaml
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: gitlab-listener-interceptor
+spec:
+  serviceAccountName: tekton-gitlab-sa
+  triggers:
+    - name: gitlab-listener
+      interceptors:
+        - name: "verify-gitlab-secret"
+          ref:
+            name: "cell"
+          params:
+            - name: "filter"
+              value: "header['X-Gitlab-Token'] == 'your-token'"
+        - name: "filter-branch"
+          ref:
+            name: "cel"
+          params:
+            - name: "filter"
+              value: "body.ref == 'refs/heads/tekton-testing'"
+      bindings:
+      - ref: push-gitlab-binding
+      template:
+        ref: push-gitlab-template

@@ -1,0 +1,34 @@
+# trigger-template.yaml
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: push-gitlab-template
+spec:
+  params:
+    - name: gitRevision
+      description: the git commit revision
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: iris-pipeline-run-
+      spec:
+        pipelineRef:
+          name: mlops-pipeline
+        params:
+        - name: gitRevision
+          value: $(tt.params.gitRevision)
+        - name: appGitUrl
+          value: 'https://gitlab.com/fatimabouincha/mlops.git'
+        - name: datasetPath
+          value: ./scripts/iris.csv
+        workspaces:
+          - name: shared-workspace
+            volumeClaimTemplate:
+              metadata:
+                name: mlops-pvc
+              spec:
+                accessModes:         ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 1Gi

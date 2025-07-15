@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: mlops-pipeline
+spec:
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: preprocess
+      taskRef:
+        name: preprocess-task
+      workspaces:
+        - name: shared-workspace
+          workspace: shared-workspace
+
+    - name: train
+      runAfter:
+        - preprocess
+      taskRef:
+        name: train-task
+      workspaces:
+        - name: shared-workspace
+          workspace: shared-workspace
+
+    - name: evaluate
+      runAfter:
+        - train
+      taskRef:
+        name: evaluate-task
+      workspaces:
+        - name: shared-workspace
+          workspace: shared-workspace
