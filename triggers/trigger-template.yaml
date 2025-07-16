@@ -1,4 +1,3 @@
-# trigger-template.yaml
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
@@ -8,14 +7,13 @@ spec:
     - name: gitRevision
       description: the git commit revision
   resourcetemplates:
-    - apiVersion: tekton.dev/v1beta1
+    - apiVersion: tekton.dev/v1
       kind: PipelineRun
       metadata:
         generateName: iris-pipeline-run-
       spec:
         pipelineRef:
           name: mlops-pipeline
-        serviceAccountName: tekton-github-sa
         params:
         - name: gitRevision
           value: $(tt.params.gitRevision)
@@ -29,7 +27,9 @@ spec:
               metadata:
                 name: mlops-pvc
               spec:
-                accessModes:         ["ReadWriteOnce"]
+                accessModes: ["ReadWriteOnce"]
                 resources:
                   requests:
                     storage: 1Gi
+        taskRunTemplate:
+          serviceAccountName: tekton-github-sa
