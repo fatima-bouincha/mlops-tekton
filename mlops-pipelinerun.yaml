@@ -1,10 +1,17 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  name: mlops-pipelinerun
+  generateName: iris-pipeline-run-
 spec:
   pipelineRef:
     name: mlops-pipeline
+  params:
+  - name: gitRevision
+    value: "abc123def456789"
+  - name: appGitUrl
+    value: 'git@github.com:fatima-bouincha/mlops-tekton.git'
+  - name: datasetPath
+    value: ./scripts/iris.csv
   workspaces:
     - name: shared-workspace
       volumeClaimTemplate:
@@ -15,3 +22,5 @@ spec:
           resources:
             requests:
               storage: 1Gi
+  taskRunTemplate:
+    serviceAccountName: tekton-github-sa
