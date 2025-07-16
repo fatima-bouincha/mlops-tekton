@@ -1,26 +1,23 @@
 # event-listener.yaml
-apiVersion: triggers.tekton.dev/v1beta1
+apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: gitlab-listener-interceptor
+  name: github-listener-interceptor
 spec:
-  serviceAccountName: tekton-gitlab-sa
+  serviceAccountName: tekton-github-sa
   triggers:
-    - name: gitlab-listener
+    - name: github-listener
       interceptors:
-        - name: "verify-gitlab-secret"
-          ref:
-            name: "cell"
+        - ref:
+            name: "github"
           params:
-            - name: "filter"
-              value: "header['X-Gitlab-Token'] == 'your-token'"
-        - name: "filter-branch"
-          ref:
-            name: "cel"
-          params:
-            - name: "filter"
-              value: "body.ref == 'refs/heads/tekton-testing'"
+            - name: "secretRef"
+              value:
+                secretName: github-trigger-secret
+                secretKey: secretToken
+            - name: "eventTypes"
+              value: ["push"]
       bindings:
-      - ref: push-gitlab-binding
+      - ref: push-github-binding
       template:
-        ref: push-gitlab-template
+        ref: push-github-template

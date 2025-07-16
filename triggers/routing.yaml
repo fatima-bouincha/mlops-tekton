@@ -1,15 +1,32 @@
-apiVersion: v1
-kind: Service
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
 metadata:
-  name: iris-pipeline-listener-service
+  name: tekton-triggers
 spec:
   selector:
-    app.kubernetes.io/managed-by: EventListener
-    app.kubernetes.io/part-of: Triggers
-    eventlistener: gitlab-listener-interceptor
-  ports:
-    - name: http
-      port: 8080
-      targetPort: 8080
-      nodePort: 30080
-  type: NodePort
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "tekton.local.test"
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: tekton-triggers
+spec:
+  hosts:
+  - "tekton.local.test"
+  gateways:
+  - tekton-triggers
+  http:
+  - route:
+    - destination:
+        host: el-github-listener-interceptor
+        port:
+          number: 8080
+---
