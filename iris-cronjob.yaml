@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: iris-pipeline-cronjob
+  namespace: default
+spec:
+  schedule: "* 10 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: pipeline-runner
+          containers:
+          - name: trigger-pipeline
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              kubectl create -f - <<EOF
+              apiVersion: tekton.dev/v1beta1
+              kind: PipelineRun
+              metadata:
+                name: iris-pipeline-run-$(date +%s)
+                namespace: default
+              spec:
+                pipelineRef:
+                  name: mlops-pipeline  # Nom de votre pipeline principal
+                params:
+                - name: repo-url
+                  value: "https://github.com/fatima-bouincha/mlops-tekton.git"
+                - name: branch
+                  value: "main"  # À personnaliser
+                workspaces:
+                  - name: shared-workspace
+                    volumeClaimTemplate:
+                      metadata:
+                        name: mlops-pvc
+                      spec:
+                        accessModes: ["ReadWriteOnce"]
+                        resources:
+                          requests:
+                            storage: 1Gi
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid  # Empêche les exécutions simultanées
